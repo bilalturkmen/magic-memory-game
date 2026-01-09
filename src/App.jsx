@@ -68,8 +68,7 @@ function App() {
     <div className="container mx-auto mt-6">
       <h1 className="text-4xl">Magic Memory Game</h1>
       <p className="text-sm mb-4 px-3">
-        A simple matching game developed with React js, Tailwind css and Vite
-        builder.
+        Challange your visual memory with this classic brain game.
       </p>
       <button type="button" className="btn-primary" onClick={shuffleCards}>
         New Game
