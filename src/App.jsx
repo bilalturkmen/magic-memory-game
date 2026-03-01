@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { cardImages } from "./components/CardImages";
+import { useState, useEffect, useCallback } from "react";
 import SingleCard from "./components/SingleCard";
-import SocialMedia from "./components/SocialMedia";
+import { CARD_IMAGES } from "./constants/card";
 
 function App() {
   const [cards, setCards] = useState([]);
@@ -10,71 +9,66 @@ function App() {
   const [choiceTwo, setChoiceTwo] = useState(null);
   const [disabled, setDisabled] = useState(false);
 
-  // shuffle cards for new game
-  const shuffleCards = () => {
-    const shuffledCards = [...cardImages, ...cardImages]
+  const shuffleCards = useCallback(() => {
+    const shuffledCards = [...CARD_IMAGES, ...CARD_IMAGES]
       .sort(() => Math.random() - 0.5)
-      .map((card) => ({ ...card, id: Math.random() }));
+      .map((card) => ({ ...card, id: crypto.randomUUID() }));
 
     setChoiceOne(null);
     setChoiceTwo(null);
     setCards(shuffledCards);
     setTurns(0);
-  };
+  }, []);
 
-  // handle a choice
   const handleChoice = (card) => {
-    console.log(card);
     choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
   };
 
-  // compare 2 selected cards
+  const resetTurn = useCallback(() => {
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setTurns((prev) => prev + 1);
+    setDisabled(false);
+  }, []);
+
   useEffect(() => {
     if (choiceOne && choiceTwo) {
       setDisabled(true);
       if (choiceOne.src === choiceTwo.src) {
-        setCards((prevCards) => {
-          return prevCards.map((card) => {
-            if (card.src === choiceOne.src) {
-              return { ...card, matched: true };
-            } else {
-              return card;
-            }
-          });
-        });
+        setCards((prev) =>
+          prev.map((c) =>
+            c.src === choiceOne.src ? { ...c, matched: true } : c,
+          ),
+        );
         resetTurn();
       } else {
-        setTimeout(() => resetTurn(), 500);
+        setTimeout(resetTurn, 800);
       }
     }
-  }, [choiceOne, choiceTwo]);
+  }, [choiceOne, choiceTwo, resetTurn]);
 
-  console.log(cards);
-
-  // reset choices & increase turn
-  const resetTurn = () => {
-    setChoiceOne(null);
-    setChoiceTwo(null);
-    setTurns((prevTurns) => prevTurns + 1);
-    setDisabled(false);
-  };
-
-  //start new game
   useEffect(() => {
     shuffleCards();
-  }, []);
+  }, [shuffleCards]);
 
   return (
-    <div className="container mx-auto mt-6">
-      <h1 className="text-4xl">Magic Memory Game</h1>
-      <p className="text-sm mb-4 px-3">
-        Challange your visual memory with this classic brain game.
-      </p>
-      <button type="button" className="btn-primary" onClick={shuffleCards}>
-        New Game
-      </button>
-      <p className="text-base">Turns: {turns}</p>
-      <div className="grid gap-4 grid-cols-4 p-6">
+    <main className="min-h-screen bg-[#260a42] text-white p-8 flex flex-col items-center">
+      <header className="text-center mb-8">
+        <h1 className="text-5xl font-bold mb-2">Magic Memory</h1>
+        <p className="text-gray-300">Challenge your visual memory</p>
+      </header>
+
+      <div className="flex gap-6 items-center mb-8">
+        <button
+          onClick={shuffleCards}
+          className="bg-white text-[#260a42] px-6 py-2 rounded-lg font-bold hover:bg-pink-500 hover:text-white transition-colors"
+        >
+          New Game
+        </button>
+        <span className="text-xl font-mono">Turns: {turns}</span>
+      </div>
+
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 max-w-2xl w-full">
         {cards.map((card) => (
           <SingleCard
             key={card.id}
@@ -85,8 +79,19 @@ function App() {
           />
         ))}
       </div>
-      <SocialMedia />
-    </div>
+
+      <footer className="mt-12 text-xs opacity-60">
+        A project from a React JS training - Coded by{" "}
+        <a
+          href="https://bilalturkmen.com"
+          className="underline hover:text-pink-400"
+          target="_blank"
+          aria-label="visit the coder's webpage"
+        >
+          Bilal Türkmen
+        </a>
+      </footer>
+    </main>
   );
 }
 

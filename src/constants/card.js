@@ -1,4 +1,4 @@
-export const cardImages = [
+export const CARD_IMAGES = [
   { src: "/img/helmet-1.png", matched: false },
   { src: "/img/potion-1.png", matched: false },
   { src: "/img/ring-1.png", matched: false },
